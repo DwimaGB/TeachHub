@@ -135,7 +135,7 @@ export default function DashboardCoursesPage() {
               <p className="text-sm text-gray-700">{course.description}</p>
               {typeof course.price === "number" && (
                 <p className="mt-1 text-sm text-gray-600">
-                  Price: ${course.price.toFixed(2)}
+                  Price: ₹{course.price?.toFixed(2)}
                 </p>
               )}
             </div>

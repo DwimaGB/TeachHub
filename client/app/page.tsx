@@ -89,12 +89,11 @@ export default function TeachHubLanding() {
           transition={{ duration: 0.6 }}
           className="text-4xl font-bold md:text-6xl"
         >
-          Master Coding with Real‑World Projects
+          Learn Better, Grow Smarter, Achieve More
         </motion.h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-400">
-          Learn MERN stack, DSA, and system design through structured lessons,
-          live batches, and industry‑ready projects.
+          Interactive lessons, guided learning, and structured courses designed to help students understand concepts clearly and build confidence in their studies.
         </p>
 
         <div className="mt-8 flex justify-center gap-4">
@@ -121,16 +120,16 @@ export default function TeachHubLanding() {
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {[
             {
-              title: "Beginner Friendly",
-              desc: "Step‑by‑step guidance designed for absolute beginners.",
+              title: "Easy to Understand",
+              desc: "Easy-to-follow lessons designed for learners at every level.",
             },
             {
-              title: "Real Projects",
-              desc: "Build production‑ready applications for your portfolio.",
+              title: "Practice and Progress",
+              desc: "Exercises, assignments, and examples that strengthen understanding and improve performance.",
             },
             {
-              title: "Lifetime Access",
-              desc: "Learn anytime with unlimited course access.",
+              title: "Learn at Your Pace",
+              desc: "Students can learn anytime, anywhere with lifetime access to course content.",
             },
           ].map((feature, i) => (
             <Card key={i} className="bg-[#181C27] border-[#272D40]">
@@ -153,10 +152,10 @@ export default function TeachHubLanding() {
               <CardContent className="p-6">
                 <div className="h-40 rounded-lg bg-[#272D40]" />
 
-                <h3 className="mt-4 font-semibold text-white">MERN Stack Bootcamp</h3>
+                <h3 className="mt-4 font-semibold text-white">Complete Learning Program</h3>
 
                 <p className="mt-2 text-sm text-gray-300">
-                  Learn MongoDB, Express, React, and Node with real projects.
+                  Structured lessons designed to help students master important concepts step by step.
                 </p>
 
                 <Button className="mt-4 w-full bg-blue-600 hover:bg-blue-700">
@@ -171,13 +170,13 @@ export default function TeachHubLanding() {
       {/* Pricing */}
       <section id="pricing" className="bg-[#181C27] py-16">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <h2 className="text-3xl font-semibold text-white">Simple Pricing</h2>
+          <h2 className="text-3xl font-semibold text-white">Simple and Affordable Learning</h2>
 
           <Card className="mx-auto mt-10 max-w-md bg-[#0F1117] border-[#272D40]">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-white">Full Access</h3>
+              <h3 className="text-2xl font-bold text-white">Full learning Access</h3>
               <p className="mt-4 text-4xl font-bold text-white">₹4,999</p>
-              <p className="mt-2 text-gray-300">Lifetime access to all courses</p>
+              <p className="mt-2 text-gray-300">One-time enrollment with lifetime access to all lessons and materials.</p>
 
               <Button className="mt-6 w-full bg-blue-600 hover:bg-blue-700">
                 Enroll Now
@@ -196,8 +195,7 @@ export default function TeachHubLanding() {
             <Card key={t} className="bg-[#181C27] border-[#272D40]">
               <CardContent className="p-6">
                 <p className="text-gray-300">
-                  "This platform helped me gain confidence and build real
-                  projects."
+                  "This platform made learning much easier and more interesting for me."
                 </p>
                 <p className="mt-4 font-semibold text-white">— Student</p>
               </CardContent>
@@ -214,16 +212,16 @@ export default function TeachHubLanding() {
           <div className="mt-10 space-y-6">
             {[
               {
-                q: "Do I need prior coding experience?",
-                a: "No, courses start from beginner level.",
+                q: "Is this suitable for beginners?",
+                a: "Yes, courses are designed to be easy to understand for learners at all levels.",
               },
               {
-                q: "Do I get lifetime access?",
-                a: "Yes, once enrolled you have lifetime access.",
+                q: "Can students learn at their own pace?",
+                a: "Yes, student can access course materials anytime, anywhere, and learn at their own pace.",
               },
               {
-                q: "Will I build projects?",
-                a: "Yes, projects are included in every course.",
+                q: "Do you provide assignments?",
+                a: "Yes, yes, we provide exercises and assignments to help students practice and reinforce their learning.",
               },
             ].map((item, i) => (
               <div key={i}>
@@ -237,9 +235,9 @@ export default function TeachHubLanding() {
 
       {/* CTA */}
       <section className="py-20 text-center">
-        <h2 className="text-3xl font-bold text-white">Start Your Coding Journey Today</h2>
+        <h2 className="text-3xl font-bold text-white">Start Your Learning Journey Today</h2>
         <p className="mt-4 text-gray-300">
-          Join thousands of learners building real‑world skills.
+          Help your child build strong foundations and confidence in their studies.
         </p>
 
         <Button size="lg" className="mt-8 bg-blue-600 hover:bg-blue-700">
