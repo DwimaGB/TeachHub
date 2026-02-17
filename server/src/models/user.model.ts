@@ -5,25 +5,30 @@ export interface IUser extends Document {
   name: string
   email: string
   password: string
-  role: "student" | "teacher" | "admin"
+  role: "student" | "admin"
   comparePassword(password: string): Promise<boolean>
+  createdAt: Date
+  updatedAt: Date
 }
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    name: { 
-        type: String, 
-        required: true },
-    email: { 
-        type: String, 
-        required: true, 
-        unique: true },
-    password: { 
-        type: String, 
-        required: true },
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
     role: {
       type: String,
-      enum: ["student", "teacher", "admin"],
+      enum: ["student", "admin"],
       default: "student",
     },
   },

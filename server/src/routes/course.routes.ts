@@ -12,6 +12,7 @@ const router = express.Router()
 router.get("/", getCourses)
 router.get("/:id", getCourseById)
 
-router.post("/", protect, authorizeRoles("teacher"), createCourse)
+// Only admin (single teacher) can create courses
+router.post("/", protect, authorizeRoles("admin"), createCourse)
 
 export default router
