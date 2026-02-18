@@ -12,9 +12,12 @@ export const register = async (req: Request, res: Response) => {
   // All signups from the app are students; admin is managed separately
   const user = await User.create({ name, email, password, role: "student" })
 
+  // Strip password before sending to client
+  const { password: _pw, ...safeUser } = user.toObject()
+
   res.json({
     token: generateToken(user._id.toString()),
-    user,
+    user: safeUser,
   })
 }
 
@@ -29,8 +32,11 @@ export const login = async (req: Request, res: Response) => {
   if (!isMatch)
     return res.status(400).json({ message: "Invalid credentials" })
 
+  // Strip password before sending to client
+  const { password: _pw, ...safeUser } = user.toObject()
+
   res.json({
     token: generateToken(user._id.toString()),
-    user,
+    user: safeUser,
   })
 }

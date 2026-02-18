@@ -13,7 +13,7 @@ export const createCourse = async (req: AuthRequest, res: Response) => {
       description: req.body.description,
       price: req.body.price,
       thumbnail,
-      publicId,     
+      publicId,
       instructor: req.user._id,
     })
 
@@ -24,11 +24,22 @@ export const createCourse = async (req: AuthRequest, res: Response) => {
 }
 
 export const getCourses = async (_req: AuthRequest, res: Response) => {
-  const courses = await Course.find().populate("instructor", "name")
-  res.json(courses)
+  try {
+    const courses = await Course.find().populate("instructor", "name")
+    res.json(courses)
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching courses" })
+  }
 }
 
 export const getCourseById = async (req: AuthRequest, res: Response) => {
-  const course = await Course.findById(req.params.id)
-  res.json(course)
+  try {
+    const course = await Course.findById(req.params.id)
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" })
+    }
+    res.json(course)
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching course" })
+  }
 }
