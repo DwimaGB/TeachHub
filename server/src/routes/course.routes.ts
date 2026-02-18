@@ -3,6 +3,8 @@ import {
   createCourse,
   getCourses,
   getCourseById,
+  updateCourse,
+  deleteCourse,
 } from "../controllers/course.controller.js"
 import { uploadThumbnail } from "../middleware/upload.middleware.js"
 import { protect } from "../middleware/auth.middleware.js"
@@ -20,6 +22,20 @@ router.post(
   authorizeRoles("admin"),
   uploadThumbnail.single("thumbnail"),
   createCourse
+)
+
+router.put(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  updateCourse
+)
+
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  deleteCourse
 )
 
 export default router

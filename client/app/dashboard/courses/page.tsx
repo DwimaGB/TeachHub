@@ -23,6 +23,7 @@ interface User {
 interface Lesson {
   _id: string
   title: string
+  description?: string
   videoUrl: string
 }
 
@@ -34,6 +35,16 @@ export default function DashboardCoursesPage() {
   const [loadingLessonsFor, setLoadingLessonsFor] = useState<string | null>(null)
   const [enrollMessage, setEnrollMessage] = useState<string | null>(null)
   const [enrollingFor, setEnrollingFor] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  const [editPrice, setEditPrice] = useState("")
+  const [savingCourse, setSavingCourse] = useState(false)
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
+  const [editLessonTitle, setEditLessonTitle] = useState("")
+  const [editLessonDescription, setEditLessonDescription] = useState("")
+  const [savingLesson, setSavingLesson] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -77,6 +88,7 @@ export default function DashboardCoursesPage() {
 
   const handleEnroll = async (courseId: string) => {
     try {
+      setErrorMessage(null)
       setEnrollMessage(null)
       setEnrollingFor(courseId)
       await api.post(`/enrollment/${courseId}`)
@@ -86,9 +98,138 @@ export default function DashboardCoursesPage() {
       const message =
         axiosErr?.response?.data?.message ||
         "Could not enroll in this course. Please try again."
-      setEnrollMessage(message)
+      setErrorMessage(message)
     } finally {
       setEnrollingFor(null)
+    }
+  }
+
+  const startEditCourse = (course: Course) => {
+    setEditingCourseId(course._id)
+    setEditTitle(course.title)
+    setEditDescription(course.description)
+    setEditPrice(typeof course.price === "number" ? String(course.price) : "")
+  }
+
+  const cancelEditCourse = () => {
+    setEditingCourseId(null)
+    setEditTitle("")
+    setEditDescription("")
+    setEditPrice("")
+  }
+
+  const handleUpdateCourse = async () => {
+    if (!editingCourseId) return
+    try {
+      setSavingCourse(true)
+      setErrorMessage(null)
+      setEnrollMessage(null)
+      const body: { title: string; description: string; price?: number } = {
+        title: editTitle,
+        description: editDescription,
+      }
+      if (editPrice.trim()) {
+        body.price = Number(editPrice)
+      }
+      const res = await api.put<Course>(`/courses/${editingCourseId}`, body)
+      const updated = res.data
+      setCourses((prev) =>
+        prev.map((c) => (c._id === updated._id ? updated : c))
+      )
+      setEnrollMessage("Course updated successfully.")
+      cancelEditCourse()
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }> | undefined
+      const message =
+        axiosErr?.response?.data?.message ||
+        "Could not update course. Please try again."
+      setErrorMessage(message)
+    } finally {
+      setSavingCourse(false)
+    }
+  }
+
+  const handleDeleteCourse = async (courseId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this course and its lessons?"
+    )
+    if (!confirmed) return
+    try {
+      setErrorMessage(null)
+      setEnrollMessage(null)
+      await api.delete(`/courses/${courseId}`)
+      setCourses((prev) => prev.filter((c) => c._id !== courseId))
+      if (selectedCourseId === courseId) {
+        setSelectedCourseId(null)
+        setLessons([])
+      }
+      setEnrollMessage("Course deleted successfully.")
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }> | undefined
+      const message =
+        axiosErr?.response?.data?.message ||
+        "Could not delete course. Please try again."
+      setErrorMessage(message)
+    }
+  }
+
+  const startEditLesson = (lesson: Lesson) => {
+    setEditingLessonId(lesson._id)
+    setEditLessonTitle(lesson.title)
+    setEditLessonDescription(lesson.description || "")
+  }
+
+  const cancelEditLesson = () => {
+    setEditingLessonId(null)
+    setEditLessonTitle("")
+    setEditLessonDescription("")
+  }
+
+  const handleUpdateLesson = async () => {
+    if (!editingLessonId) return
+    try {
+      setSavingLesson(true)
+      setErrorMessage(null)
+      setEnrollMessage(null)
+      const body = {
+        title: editLessonTitle,
+        description: editLessonDescription,
+      }
+      const res = await api.put<Lesson>(`/lessons/${editingLessonId}`, body)
+      const updated = res.data
+      setLessons((prev) =>
+        prev.map((l) => (l._id === updated._id ? updated : l))
+      )
+      setEnrollMessage("Lesson updated successfully.")
+      cancelEditLesson()
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }> | undefined
+      const message =
+        axiosErr?.response?.data?.message ||
+        "Could not update lesson. Please try again."
+      setErrorMessage(message)
+    } finally {
+      setSavingLesson(false)
+    }
+  }
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this lesson?"
+    )
+    if (!confirmed) return
+    try {
+      setErrorMessage(null)
+      setEnrollMessage(null)
+      await api.delete(`/lessons/${lessonId}`)
+      setLessons((prev) => prev.filter((l) => l._id !== lessonId))
+      setEnrollMessage("Lesson deleted successfully.")
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }> | undefined
+      const message =
+        axiosErr?.response?.data?.message ||
+        "Could not delete lesson. Please try again."
+      setErrorMessage(message)
     }
   }
 
@@ -100,6 +241,11 @@ export default function DashboardCoursesPage() {
         <h1 className="text-2xl font-bold text-white">All Courses</h1>
       </div>
 
+      {errorMessage && (
+        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {errorMessage}
+        </p>
+      )}
       {enrollMessage && (
         <p className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-400">
           {enrollMessage}
@@ -151,14 +297,77 @@ export default function DashboardCoursesPage() {
                 )}
 
                 {isAdmin && (
-                  <Link href={`/courses/${course._id}/add-lesson`}>
-                    <button className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700">
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Lesson
+                  <>
+                    <Link href={`/courses/${course._id}/add-lesson`}>
+                      <button className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+                        <Plus className="h-3.5 w-3.5" />
+                        Add Lesson
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => startEditCourse(course)}
+                      className="rounded-lg bg-[#272D40] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#323948]"
+                    >
+                      Edit
                     </button>
-                  </Link>
+                    <button
+                      onClick={() => handleDeleteCourse(course._id)}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </>
                 )}
               </div>
+
+              {isAdmin && editingCourseId === course._id && (
+                <div className="mt-3 space-y-3 rounded-lg border border-[#272D40] bg-[#0F1117] p-3">
+                  <div>
+                    <input
+                      type="text"
+                      className="w-full rounded-lg border border-[#272D40] bg-[#0F1117] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="Course title"
+                    />
+                  </div>
+                  <div>
+                    <textarea
+                      rows={3}
+                      className="w-full rounded-lg border border-[#272D40] bg-[#0F1117] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Course description"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      className="w-full rounded-lg border border-[#272D40] bg-[#0F1117] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      value={editPrice}
+                      onChange={(e) => setEditPrice(e.target.value)}
+                      placeholder="Price (optional)"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleUpdateCourse}
+                      disabled={savingCourse}
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {savingCourse ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditCourse}
+                      className="rounded-lg bg-[#272D40] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#323948]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Lessons List */}
               {selectedCourseId === course._id && lessons.length > 0 && (
@@ -169,14 +378,75 @@ export default function DashboardCoursesPage() {
                   {lessons.map((lesson, index) => (
                     <div
                       key={lesson._id}
-                      className="flex items-center gap-3 rounded-lg bg-[#0F1117] p-3"
+                      className="space-y-2 rounded-lg bg-[#0F1117] p-3"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#272D40] text-xs font-semibold text-gray-400">
-                        {index + 1}
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#272D40] text-xs font-semibold text-gray-400">
+                          {index + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-white">
+                            {lesson.title}
+                          </p>
+                          {lesson.description && (
+                            <p className="text-xs text-gray-400">
+                              {lesson.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-white">{lesson.title}</p>
-                      </div>
+                      {isAdmin && editingLessonId === lesson._id && (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            className="w-full rounded-lg border border-[#272D40] bg-[#0F1117] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            value={editLessonTitle}
+                            onChange={(e) => setEditLessonTitle(e.target.value)}
+                            placeholder="Lesson title"
+                          />
+                          <textarea
+                            rows={2}
+                            className="w-full rounded-lg border border-[#272D40] bg-[#0F1117] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                            value={editLessonDescription}
+                            onChange={(e) =>
+                              setEditLessonDescription(e.target.value)
+                            }
+                            placeholder="Lesson description"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleUpdateLesson}
+                              disabled={savingLesson}
+                              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                            >
+                              {savingLesson ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditLesson}
+                              className="rounded-lg bg-[#272D40] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#323948]"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {isAdmin && editingLessonId !== lesson._id && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEditLesson(lesson)}
+                            className="rounded-lg bg-[#272D40] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#323948]"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLesson(lesson._id)}
+                            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

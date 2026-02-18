@@ -92,3 +92,42 @@ export const getLessons = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Error fetching lessons" })
   }
 }
+
+export const updateLesson = async (req: AuthRequest, res: Response) => {
+  try {
+    const { lessonId } = req.params
+    const { title, description } = req.body
+
+    const lesson = await Lesson.findById(lessonId)
+    if (!lesson) {
+      return res.status(404).json({ message: "Lesson not found" })
+    }
+
+    if (typeof title === "string" && title.trim()) {
+      lesson.title = title
+    }
+    if (typeof description === "string") {
+      lesson.description = description
+    }
+
+    const updated = await lesson.save()
+    res.json(updated)
+  } catch (error) {
+    res.status(500).json({ message: "Error updating lesson" })
+  }
+}
+
+export const deleteLesson = async (req: AuthRequest, res: Response) => {
+  try {
+    const { lessonId } = req.params
+
+    const deleted = await Lesson.findByIdAndDelete(lessonId)
+    if (!deleted) {
+      return res.status(404).json({ message: "Lesson not found" })
+    }
+
+    res.json({ message: "Lesson deleted successfully" })
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting lesson" })
+  }
+}
