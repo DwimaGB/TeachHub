@@ -4,6 +4,7 @@ import {
   getCourses,
   getCourseById,
 } from "../controllers/course.controller.js"
+import { uploadThumbnail } from "../middleware/upload.middleware.js"
 import { protect } from "../middleware/auth.middleware.js"
 import { authorizeRoles } from "../middleware/role.middleware.js"
 
@@ -13,6 +14,12 @@ router.get("/", getCourses)
 router.get("/:id", getCourseById)
 
 // Only admin (single teacher) can create courses
-router.post("/", protect, authorizeRoles("admin"), createCourse)
+router.post(
+  "/",
+  protect,
+  authorizeRoles("admin"),
+  uploadThumbnail.single("thumbnail"),
+  createCourse
+)
 
 export default router

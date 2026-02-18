@@ -2,11 +2,26 @@ import mongoose from "mongoose"
 
 const lessonSchema = new mongoose.Schema(
   {
-    title: String,
-    videoUrl: String,
+    title: {
+      type: String,
+      required: true,
+    },
+    description: String,
+
+    videoUrl: {
+      type: String,
+      required: true,
+    },
+
+    publicId: {
+      type: String,
+      required: true,
+    },
+
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
+      required: true,
     },
   },
   { timestamps: true }

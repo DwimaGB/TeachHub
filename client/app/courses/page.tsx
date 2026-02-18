@@ -2,19 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-
-interface Course {
-  _id: string
-  title: string
-  description: string
-}
+import Link from "next/link"
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([])
+  const [courses, setCourses] = useState<any[]>([])
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const res = await api.get<Course[]>("/courses")
+      const res = await api.get("/courses")
       setCourses(res.data)
     }
 
@@ -22,16 +17,17 @@ export default function CoursesPage() {
   }, [])
 
   return (
-    <div className="mx-auto mt-10 max-w-3xl space-y-4">
-      <h1 className="text-2xl font-bold">Courses</h1>
+    <div>
+      <h1>Courses</h1>
 
       {courses.map((course) => (
-        <div
-          key={course._id}
-          className="rounded border bg-white p-4 shadow-sm"
-        >
-          <h3 className="text-lg font-semibold">{course.title}</h3>
-          <p className="text-sm text-gray-700">{course.description}</p>
+        <div key={course._id}>
+          <img src={course.thumbnail} width={200} />
+          <h3>{course.title}</h3>
+
+          <Link href={`/courses/${course._id}`}>
+            View Course
+          </Link>
         </div>
       ))}
     </div>
