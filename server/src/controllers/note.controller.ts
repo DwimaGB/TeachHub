@@ -1,6 +1,7 @@
 import type { Response } from "express"
 import type { AuthRequest } from "../middleware/auth.middleware.js"
-import { createNote, getNotesByLesson, deleteNote } from "../services/note.service.js"
+import { createNote, getNotesByLesson, deleteNote, getNoteById } from "../services/note.service.js"
+import { supabase } from "../config/supabase.js"
 
 export const createNoteHandler = async (req: AuthRequest, res: Response) => {
     try {
@@ -11,16 +12,35 @@ export const createNoteHandler = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "File is required" })
         }
 
-        const fileUrl = file.path ?? file.secure_url ?? file.url ?? file.location
-        const publicId = file.filename ?? file.public_id ?? file.publicId ?? file.key
-
-        if (!fileUrl || !publicId) {
-            return res.status(400).json({ message: "Uploaded file missing URL or public id" })
-        }
-
         if (!lessonId || typeof lessonId !== "string") {
             return res.status(400).json({ message: "Invalid lesson id" })
         }
+
+        const baseName = file.originalname
+            .replace(/\.[^/.]+$/, "")      // remove extension
+            .replace(/[^a-zA-Z0-9_-]/g, "_") // sanitize
+            .slice(0, 80)                  // limit length
+        const uniqueName = `${Date.now()}-${baseName}.pdf`
+
+        const { data, error } = await supabase.storage
+            .from("notes")
+            .upload(uniqueName, file.buffer, {
+                contentType: file.mimetype || "application/pdf",
+                upsert: false
+            })
+
+        if (error) {
+            console.error("Supabase upload error:", error)
+            return res.status(500).json({ message: "Error uploading file to storage" })
+        }
+
+        const publicId = data.path
+
+        const { data: publicUrlData } = supabase.storage
+            .from("notes")
+            .getPublicUrl(publicId)
+
+        const fileUrl = publicUrlData.publicUrl
 
         const note = await createNote({ title, description, lessonId, fileUrl, publicId })
         res.status(201).json(note)
@@ -47,12 +67,47 @@ export const getNotesByLessonHandler = async (req: AuthRequest, res: Response) =
 
 export const deleteNoteHandler = async (req: AuthRequest, res: Response) => {
     try {
-        await deleteNote(req.params.noteId as string)
+        const deletedNote = await deleteNote(req.params.noteId as string)
+
+        if (deletedNote?.publicId) {
+            await supabase.storage.from("notes").remove([deletedNote.publicId])
+        }
+
         res.json({ message: "Note deleted successfully" })
     } catch (error: any) {
         if (error.message === "Note not found") {
             return res.status(404).json({ message: error.message })
         }
         res.status(500).json({ message: "Error deleting note" })
+    }
+}
+
+
+export const downloadNoteHandler = async (req: AuthRequest, res: Response) => {
+    try {
+        const note = await getNoteById(req.params.noteId as string)
+
+        if (!note) {
+            return res.status(404).json({ message: "Note not found" })
+        }
+
+        if (!note.publicId) {
+            return res.status(400).json({ message: "File not available" })
+        }
+
+        // Signed URL works for both public & private buckets
+        const { data, error } = await supabase.storage
+            .from("notes")
+            .createSignedUrl(note.publicId, 60, {
+                download: `${note.title}.pdf`,
+            })
+
+        if (error) throw error
+
+        res.redirect(data.signedUrl)
+
+    } catch (error) {
+        console.error("Download error:", error)
+        res.status(500).json({ message: "Error downloading note" })
     }
 }

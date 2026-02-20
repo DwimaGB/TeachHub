@@ -6,7 +6,7 @@ import { api } from "@/lib/api"
 import Link from "next/link"
 import {
     ArrowLeft, Plus, Trash2, Edit3, Save, X, Upload, Loader2,
-    ChevronDown, ChevronUp, FileText, ExternalLink,
+    ChevronDown, ChevronUp, FileText, Download,
 } from "lucide-react"
 import type { AxiosError } from "axios"
 
@@ -437,9 +437,12 @@ export default function BatchManagePage() {
                                                                                         <span className="text-xs text-white truncate">{note.title}</span>
                                                                                     </div>
                                                                                     <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                                                                                        <a href={note.fileUrl} target="_blank" rel="noopener noreferrer" className="rounded bg-[#272D40] p-1.5 text-gray-400 hover:text-white">
-                                                                                            <ExternalLink className="h-3 w-3" />
-                                                                                        </a>
+                                                                                        <button
+                                                                                            className="rounded bg-[#272D40] p-1.5 text-gray-400 hover:text-white"
+                                                                                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notes/${note._id}/download`, "_blank")}
+                                                                                        >
+                                                                                            <Download className="h-3 w-3" />
+                                                                                        </button>
                                                                                         <button onClick={() => handleDeleteNote(note._id)} className="rounded bg-red-600/10 p-1.5 text-red-400 hover:bg-red-600/20">
                                                                                             <Trash2 className="h-3 w-3" />
                                                                                         </button>

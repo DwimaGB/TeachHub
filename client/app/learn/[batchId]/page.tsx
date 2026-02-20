@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { api } from "@/lib/api"
 import Link from "next/link"
-import { ArrowLeft, PlayCircle, Lock, FileText, ExternalLink, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowLeft, PlayCircle, Lock, FileText, Download, ChevronDown, ChevronUp } from "lucide-react"
 import type { AxiosError } from "axios"
 
 interface Lesson {
@@ -202,12 +202,10 @@ export default function LearnPage() {
                   </h2>
                   <div className="space-y-2">
                     {notes.map((note) => (
-                      <a
+                      <button
                         key={note._id}
-                        href={note.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 rounded-lg border border-[#272D40] bg-[#181C27] p-3 transition-all hover:border-blue-500/30"
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/notes/${note._id}/download`, "_blank")}
+                        className="flex w-full items-center gap-3 rounded-lg border border-[#272D40] bg-[#181C27] p-3 transition-all hover:border-blue-500/30 text-left"
                       >
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600/10">
                           <FileText className="h-4 w-4 text-blue-400" />
@@ -218,8 +216,8 @@ export default function LearnPage() {
                             <p className="text-xs text-gray-500 truncate">{note.description}</p>
                           )}
                         </div>
-                        <ExternalLink className="h-4 w-4 shrink-0 text-gray-500" />
-                      </a>
+                        <Download className="h-4 w-4 shrink-0 text-gray-500" />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -260,14 +258,14 @@ export default function LearnPage() {
                             key={lesson._id}
                             onClick={() => selectLesson(lesson, section.title)}
                             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${isActive
-                                ? "bg-blue-600/10 text-blue-400"
-                                : "text-gray-400 hover:bg-[#272D40] hover:text-white"
+                              ? "bg-blue-600/10 text-blue-400"
+                              : "text-gray-400 hover:bg-[#272D40] hover:text-white"
                               }`}
                           >
                             <div
                               className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-xs font-semibold ${isActive
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-[#272D40] text-gray-500"
+                                ? "bg-blue-600 text-white"
+                                : "bg-[#272D40] text-gray-500"
                                 }`}
                             >
                               {index + 1}

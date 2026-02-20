@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from "react"
@@ -14,28 +15,43 @@ interface User {
 }
 
 export default function TeachHubLanding() {
-  const [year] = useState(() => new Date().getFullYear())
-  const [user, setUser] = useState<User | null>(null)
-  const [hydrated, setHydrated] = useState(false)
+  const router = useRouter()
+  const [year, setYear] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setHydrated(true)
-    try {
-      const stored = window.localStorage.getItem("user")
-      const token = window.localStorage.getItem("token")
-      if (stored && token) {
-        setUser(JSON.parse(stored) as User)
-      } else {
-        setUser(null)
+    setYear(new Date().getFullYear())
+
+    // Check if user is logged in
+    const storedUser = localStorage.getItem("user")
+    const token = localStorage.getItem("token")
+
+    if (storedUser && token) {
+      try {
+        const user: User = JSON.parse(storedUser)
+
+        // Redirect based on role
+        if (user.role === "admin") {
+          router.push("/admin")
+        } else if (user.role === "student") {
+          router.push("/dashboard")
+        }
+      } catch (err) {
+        console.error("Error parsing user data:", err)
+        setIsLoading(false)
       }
-    } catch {
-      setUser(null)
+    } else {
+      setIsLoading(false)
     }
-  }, [])
+  }, [router])
 
   return (
     <>
-      {
+      {isLoading ? (
+        <div className="flex min-h-screen items-center justify-center bg-[#0F1117]">
+          <p className="text-white">Loading...</p>
+        </div>
+      ) : (
         <div className="min-h-screen bg-[#0F1117] text-white">
           {/* Navbar */}
           <header className="border-b border-[#272D40] bg-[#181C27]">
@@ -46,33 +62,21 @@ export default function TeachHubLanding() {
               </div>
 
               <div className="hidden gap-6 text-sm text-gray-300 md:flex">
-                <a href="#batches" className="hover:text-white">Batches</a>
+                <a href="#courses" className="hover:text-white">Courses</a>
                 <a href="#features" className="hover:text-white">Features</a>
                 <a href="#pricing" className="hover:text-white">Pricing</a>
                 <a href="#faq" className="hover:text-white">FAQ</a>
               </div>
 
               <div className="flex gap-3">
-                {hydrated && user ? (
-                  <Link href="/dashboard">
-                    <Button className="bg-blue-600 text-white hover:bg-blue-700 hover:text-white">
-                      Dashboard
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href="/login">
-                      <Button className="border border-blue-600 bg-transparent text-white hover:bg-blue-600 hover:text-white">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/register">
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700 hover:text-white">
-                        Get Started
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <Link href="/login">
+                  <Button className="border border-blue-600 bg-transparent text-white hover:bg-blue-600 hover:text-white">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-blue-600 text-white hover:bg-blue-700 hover:text-white">Get Started</Button>
+                </Link>
               </div>
             </div>
           </header>
@@ -89,13 +93,13 @@ export default function TeachHubLanding() {
             </motion.h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-400">
-              Interactive lessons, guided learning, and structured batches designed to help students understand concepts clearly and build confidence in their studies.
+              Interactive lessons, guided learning, and structured courses designed to help students understand concepts clearly and build confidence in their studies.
             </p>
 
             <div className="mt-8 flex justify-center gap-4">
-              <Link href="/dashboard">
+              <Link href="/courses">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  Get Started
+                  Explore Courses
                 </Button>
               </Link>
               <Link href="/dashboard">
@@ -139,8 +143,8 @@ export default function TeachHubLanding() {
           </section>
 
           {/* Courses */}
-          <section id="batches" className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-center text-3xl font-semibold text-white">Your Batches</h2>
+          <section id="courses" className="mx-auto max-w-6xl px-6 py-16">
+            <h2 className="text-center text-3xl font-semibold text-white">Popular Courses</h2>
 
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[1, 2, 3].map((course) => (
@@ -191,7 +195,7 @@ export default function TeachHubLanding() {
                 <Card key={t} className="bg-[#181C27] border-[#272D40]">
                   <CardContent className="p-6">
                     <p className="text-gray-300">
-                      &quot;This platform made learning much easier and more interesting for me.&quot;
+                      "This platform made learning much easier and more interesting for me."
                     </p>
                     <p className="mt-4 font-semibold text-white">— Student</p>
                   </CardContent>
@@ -246,7 +250,7 @@ export default function TeachHubLanding() {
             © {year || new Date().getFullYear()} TeachHub. All rights reserved.
           </footer>
         </div>
-      }
+      )}
     </>
   )
 }

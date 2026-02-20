@@ -26,6 +26,10 @@ export async function getNotesByLesson(lessonId: string) {
     return await Note.find({ lesson: lessonId }).sort({ createdAt: -1 })
 }
 
+export async function getNoteById(noteId: string) {
+    return await Note.findById(noteId)
+}
+
 export async function deleteNote(noteId: string) {
     const deleted = await Note.findByIdAndDelete(noteId)
     if (!deleted) throw new Error("Note not found")
