@@ -23,6 +23,8 @@ const documentStorage = new CloudinaryStorage({
   params: {
     folder: "teachhub/notes",
     resource_type: "raw",
+    format: "pdf",
+    allowed_formats: ["pdf"],
   } as any,
 })
 
